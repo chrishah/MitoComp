@@ -1,0 +1,76 @@
+# this is the cluster config file template for SLURM clusters
+# you can change them according to your own cluster settings.
+# please use the long options for individual flags (eg. use --ntasks instead of -n)
+__default__:
+   job-name: DEF
+   ntasks: 1
+   ntasks-per-core: 1
+   hint: multithread
+   partition: hpc
+   mem: "4G"
+   time: "10:00:00"
+   output: $(pwd)/log/slurm-%j.out
+   error: $(pwd)/log/slurm-%j.err
+fastqdump:
+   job-name: FASTQD
+   mem: 10G
+   time: "24:00:00"
+get_organelle:
+   mem: 20G
+   job-name: GETORG
+setup_mitoflex_db:
+   job-name: sMFDB
+mitoflex:
+   job-name: MITOF
+   mem: 20G
+norgal:
+   job-name: NORGAL
+   mem: 20G
+NOVOconfig:
+   job-name: NOVOC
+NOVOplasty:
+   job-name: NOVOP
+   mem: 20G
+quast:
+   job-name: QUAST
+subsample:
+   job-name: SUB
+   mem: 20G
+trimgalore:
+   job-name: TRIM
+   mem: 20G
+   time: "15:00:00"
+trimmomatic:
+   job-name: TRIM
+   mem: 20G
+   time: "15:00:00"
+interleave:
+   job-name: INTER
+   mem: 10G
+MITObim:
+   job-name: MITOB
+   mem: 20G
+   time: "24:00:00"
+roll:
+   job-name: ROLL
+reverse_complement:
+   job-name: REVCOMP
+align:
+   job-name: ALIGN
+second_mitos:
+   job-name: MITOS2
+gene_positions:
+   job-name: GENPOS
+mitos_ref_db:
+   job-name: MITODB
+mitos:
+   job-name: MITOS
+annotation_stats:
+   job-name: ANNSTAT
+gbk_prep:
+   job-name: GBKPREP
+CCT:
+   job-name: CCT
+report:
+   job-name: report
+   time: "00:10:00"
