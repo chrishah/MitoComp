@@ -36,6 +36,9 @@ quast:
 subsample:
    job-name: SUB
    mem: 20G
+trimgalore:
+   job-name: TRIM
+   mem: 20G
 trimmomatic:
    job-name: TRIM
    mem: 20G

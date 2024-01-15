@@ -31,6 +31,9 @@ quast:
 subsample:
    N: SUB
    h_vmem: 20G
+trimgalore:
+   N: TRIM
+   h_vmem: 20G
 trimmomatic:
    N: TRIM
    h_vmem: 20G

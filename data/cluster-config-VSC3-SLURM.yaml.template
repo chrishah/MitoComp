@@ -50,6 +50,12 @@ subsample:
    qos: "normal_binf -C binf"
    mem: 100G
    ntasks: 24
+trimgalore:
+   job-name: TRIM
+   partition: binf
+   qos: "normal_binf -C binf"
+   ntasks: 24
+   mem: 100G
 trimmomatic:
    job-name: TRIM
    partition: binf

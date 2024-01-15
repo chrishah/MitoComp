@@ -1,7 +1,7 @@
 rule subsample:
     input:
-        f = rules.trimmomatic.output.fout,
-        r = rules.trimmomatic.output.rout
+        f = "output/{id}/reads/trimmed/"+config["trimming"]["software"]+"/{id}_1P_trim.fastq.gz",
+        r = "output/{id}/reads/trimmed/"+config["trimming"]["software"]+"/{id}_2P_trim.fastq.gz"
     output:
         f = "output/{id}/reads/sub/{sub}/{id}_1.fastq.gz",
         r = "output/{id}/reads/sub/{sub}/{id}_2.fastq.gz",

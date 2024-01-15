@@ -35,6 +35,10 @@ quast:
 subsample:
    job-name: SUB
    mem: 20G
+trimgalore:
+   job-name: TRIM
+   mem: 20G
+   time: "15:00:00"
 trimmomatic:
    job-name: TRIM
    mem: 20G

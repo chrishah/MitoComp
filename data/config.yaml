@@ -1,11 +1,12 @@
 samples: "data/data.csv"
 
-Assembler: ["norgal", "getorganelle", "mitoflex", "novoplasty", "mitobim"]
+Assembler: ["norgal"]
 sub: ["5000000", "10000000", "20000000", "all"]
 
 threads:
     download: 2
-    trimming: 4
+    trimmomatic: 4
+    trimgalore: 4
     subsample: 4
     interleave: 4
     norgal: 4
@@ -17,14 +18,18 @@ threads:
     alignment: 4        
 
 trimming:
-    minlength: 40 
-    windowsize: 5
-    stepsize: 4
-    quality: 3
-    required_quality: 15
-    seed_mismatches: 2
-    palindrome_clip: 30
-    simple_clip: 10
+    software: "trimgalore" #, "trimgalore"]
+    trimgalore_options:
+        parameters: "--paired --length 70 -r1 71 -r2 71 --retain_unpaired --stringency 2 --quality 30"
+    trimmomatic_options:
+        minlength: 40 
+        windowsize: 5
+        stepsize: 4
+        quality: 3
+        required_quality: 15
+        seed_mismatches: 2
+        palindrome_clip: 30
+        simple_clip: 10
 
 subsample:
     seed: 553353
