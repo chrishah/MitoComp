@@ -143,7 +143,7 @@ def pick_mode(wildcards):
         for f in glob.glob("output/gathered_assemblies/*.fasta"):
             (i,s,a) = os.path.basename(f).split(".")[:-1]
             pull_list.append("output/"+i+"/annotation/compare/CCT/"+i+"."+s+"."+a+".CCT.done")
-        print("Mode is annotate: ", len(pull_list), "input files.")
+        print("Mode is 'annotate': ", len(pull_list), "target files.")
         for f in pull_list:
             print(f)
         return pull_list
@@ -152,7 +152,7 @@ def pick_mode(wildcards):
             for s in sub:
                 for a in Assembler:    
                     pull_list.append("output/"+i+"/assemblies/"+s+"/"+a+"/"+a+".ok")
-        print("Mode is assembly: ", len(pull_list), "input files.")
+        print("Mode is 'assembly': ", len(pull_list), "target files.")
         for f in pull_list:
             print(f)
         return pull_list
@@ -163,6 +163,6 @@ def pick_mode(wildcards):
                 for a in Assembler:
                     pull_list.append("output/"+i+"/annotation/compare/CCT/"+i+"."+s+"."+a+".CCT.done")
         PULL_LIST = pull_list
-        print("Mode is all: ", len(PULL_LIST), "input files.")
+        print("Mode is 'all': ", len(PULL_LIST), "target files.")
         return PULL_LIST 
 
