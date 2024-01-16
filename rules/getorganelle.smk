@@ -1,8 +1,7 @@
 rule get_organelle:
     input:
-        ok = rules.subsample.output,
-        f = rules.subsample.output.f,
-        r = rules.subsample.output.r
+        f = get_reads_for_assembly_fw,
+        r = get_reads_for_assembly_rv
     output:
         ok = "output/{id}/assemblies/{sub}/getorganelle/getorganelle.ok"
     params:

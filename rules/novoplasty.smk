@@ -1,7 +1,6 @@
 rule NOVOconfig:
     input:
         "bin/NOVOconfig.txt",
-        rules.subsample.output.ok
     output:
         "output/{id}/assemblies/{sub}/novoplasty/NOVOconfig_{id}_{sub}.txt"
     params:
@@ -9,8 +8,8 @@ rule NOVOconfig:
         WD = os.getcwd(),
         seed = get_seed,
         log = "output/{id}/assemblies/{sub}/novoplasty/NOVOconfig_{id}_{sub}_log.txt",
-        f = rules.subsample.output.f,
-        r = rules.subsample.output.r,
+        f = get_reads_for_assembly_fw,
+        r = get_reads_for_assembly_rv,
         kmer = get_kmer,
         Read_length = get_readlength
     shell:
@@ -31,7 +30,8 @@ rule NOVOconfig:
 rule NOVOplasty:
     input:
         config = rules.NOVOconfig.output,
-        ok = rules.subsample.output.ok
+        f = get_reads_for_assembly_fw,
+        r = get_reads_for_assembly_rv
     output: 
         ok = "output/{id}/assemblies/{sub}/novoplasty/novoplasty.ok"
     params:

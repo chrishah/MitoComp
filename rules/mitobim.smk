@@ -1,11 +1,10 @@
 rule interleave:
     input:
-        ok = rules.subsample.output.ok,
-        f = rules.subsample.output.f,
-        r = rules.subsample.output.r
+        f = get_reads_for_assembly_fw,
+        r = get_reads_for_assembly_rv
     threads: config["threads"]["interleave"]
     output:
-        "output/{id}/reads/interleave/{sub}/{id}_{sub}_interleaved.fastq"
+        "output/{id}/reads/interleave/{sub}/{id}_{sub}_interleaved.fastq.gz"
     singularity:
         "docker://reslp/bbmap:38.90"
     shell:

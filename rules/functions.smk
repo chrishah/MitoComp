@@ -20,6 +20,30 @@ def get_seed(wildcards):
             os._exit(1)
 
 
+def get_reads_for_assembly_fw(wildcards):
+	if (wildcards.sub == "all"):
+		if (config["skip_trimming"] == "yes"):
+			if sample_data.loc[(wildcards.id), ["SRA"]].any():
+				return "output/{id}/reads/downloaded_reads/"+wildcards.id+"_1.fastq.gz"
+			else:
+				return "output/{id}/reads/local_reads/"+wildcards.id+"_1.fastq.gz"
+		else:
+			return "output/{id}/reads/trimmed/"+config["trimming"]["software"]+"/{id}_1P_trim.fastq.gz"	
+	else:
+		return "output/{id}/reads/sub/{sub}/{id}_1.fastq.gz"
+
+def get_reads_for_assembly_rv(wildcards):
+	if (wildcards.sub == "all"):
+		if (config["skip_trimming"] == "yes"):
+			if sample_data.loc[(wildcards.id), ["SRA"]].any():
+				return "output/{id}/reads/downloaded_reads/"+wildcards.id+"_2.fastq.gz"
+			else:
+				return "output/{id}/reads/local_reads/"+wildcards.id+"_2.fastq.gz"
+		else:
+			return "output/{id}/reads/trimmed/"+config["trimming"]["software"]+"/{id}_2P_trim.fastq.gz"	
+	else:
+		return "output/{id}/reads/sub/{sub}/{id}_2.fastq.gz"
+
 def get_trimmed_reads_fw(wildcards):
 	if (config["skip_trimming"] == "yes"):
 		if sample_data.loc[(wildcards.id), ["SRA"]].any():
