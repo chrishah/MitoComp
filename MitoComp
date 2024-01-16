@@ -28,7 +28,7 @@ version() {
         echo "$0 Git commit: $commit"
         exit 0
 }
-CLUSTER=""
+CLUSTER="local"
 CONFIG="data/config.yaml"
 CLUSTER_CONFIG=""
 SETUP=""
