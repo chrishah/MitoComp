@@ -1,6 +1,7 @@
 rule NOVOconfig:
     input:
-        "bin/NOVOconfig.txt"
+        "bin/NOVOconfig.txt",
+        rules.subsample.output.ok
     output:
         "output/{id}/assemblies/{sub}/novoplasty/NOVOconfig_{id}_{sub}.txt"
     params:
@@ -14,12 +15,15 @@ rule NOVOconfig:
         Read_length = get_readlength
     shell:
         """
-        cp {input} {output}
+        forward=$(realpath {params.WD}/{params.f})
+        reverse=$(realpath {params.WD}/{params.r})
+
+        cp {input[0]} {output}
         sed -i 's?^Project name.*?Project name = {params.project_name}?g' {output}
         sed -i 's?^Seed Input.*?Seed Input = {params.WD}/{params.seed}?g' {output}
         sed -i 's?^Extended log.*?Extended log = {params.WD}/{params.log}?g' {output}
-        sed -i 's?^Forward reads.*?Forward reads = {params.WD}/{params.f}?g' {output}
-        sed -i 's?^Reverse reads.*?Reverse reads = {params.WD}/{params.r}?g' {output}
+        sed -i "s?^Forward reads.*?Forward reads = $forward?g" {output}
+        sed -i "s?^Reverse reads.*?Reverse reads = $reverse?g" {output}
         sed -i 's?^K-mer.*?K-mer = {params.kmer}?g' {output}
         sed -i 's?^Read Length.*?Read Length = {params.Read_length}?g' {output}
         """

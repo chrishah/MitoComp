@@ -1,7 +1,7 @@
 rule subsample:
     input:
-        f = "output/{id}/reads/trimmed/"+config["trimming"]["software"]+"/{id}_1P_trim.fastq.gz",
-        r = "output/{id}/reads/trimmed/"+config["trimming"]["software"]+"/{id}_2P_trim.fastq.gz"
+        f = get_trimmed_reads_fw,
+        r = get_trimmed_reads_rv
     output:
         f = "output/{id}/reads/sub/{sub}/{id}_1.fastq.gz",
         r = "output/{id}/reads/sub/{sub}/{id}_2.fastq.gz",

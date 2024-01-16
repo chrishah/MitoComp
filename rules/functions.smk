@@ -19,6 +19,26 @@ def get_seed(wildcards):
             print("The assemblers GetOrganelle, Novoplasty and Mitobim require a valid seed file. You don't seem to be providing one ('"+seedfile+"') for sample: "+wildcards.id+". Please doublecheck the column 'seed' in your "+config["samples"]+".")
             os._exit(1)
 
+
+def get_trimmed_reads_fw(wildcards):
+	if (config["skip_trimming"] == "yes"):
+		if sample_data.loc[(wildcards.id), ["SRA"]].any():
+			return "output/{id}/reads/downloaded_reads/"+wildcards.id+"_1.fastq.gz"
+		else:
+			return "output/{id}/reads/local_reads/"+wildcards.id+"_1.fastq.gz"
+	else:
+		return "output/{id}/reads/trimmed/"+config["trimming"]["software"]+"/{id}_1P_trim.fastq.gz"	
+
+def get_trimmed_reads_rv(wildcards):
+	if (config["skip_trimming"] == "yes"):
+		if sample_data.loc[(wildcards.id), ["SRA"]].any():
+			return "output/{id}/reads/downloaded_reads/"+wildcards.id+"_2.fastq.gz"
+		else:
+			return "output/{id}/reads/local_reads/"+wildcards.id+"_2.fastq.gz"
+	else:
+		return "output/{id}/reads/trimmed/"+config["trimming"]["software"]+"/{id}_2P_trim.fastq.gz"	
+
+
 def get_clade(wildcards):
         return sample_data.loc[(wildcards.id), ["Clade"]].dropna().values[0]
 
