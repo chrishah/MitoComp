@@ -1,7 +1,12 @@
 samples: "data/data.csv"
 
-Assembler: ["norgal"]
+skip_trimming: #"yes"
 sub: ["5000000", "10000000", "20000000", "all"]
+Assembler: ["mitobim","novoplasty","getorganelle"] #["norgal", "getorganelle", "mitoflex", "novoplasty", "mitobim"]
+Assembler_options:
+    mitobim:
+        iterations: 50
+        non_default: "--clean" 
 
 threads:
     download: 2

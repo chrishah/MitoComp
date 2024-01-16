@@ -22,6 +22,8 @@ rule MITObim:
         id = "{id}",
         seed = get_seed,
         wd = os.getcwd(),
+	end = config["Assembler_options"]["mitobim"]["iterations"],
+	non_default = config["Assembler_options"]["mitobim"]["non_default"],
         outdir = "output/{id}/assemblies/{sub}/mitobim/run"
     log: 
         stdout = "output/{id}/assemblies/{sub}/mitobim/stdout.txt",
@@ -39,7 +41,7 @@ rule MITObim:
         cd {params.outdir}
         
         # run mitobim - capture returncode, so if it fails, the pipeline won't stop
-        MITObim.pl -sample {params.id} -ref seed -readpool $WD/{input} --quick $WD/{params.seed} -end 100 --paired --clean --NFS_warn_only 1> $WD/{log.stdout} 2> $WD/{log.stderr} && returncode=$? || returncode=$?
+        MITObim.pl -sample {params.id} -ref seed -readpool $WD/{input} --quick $WD/{params.seed} -end {params.end} --NFS_warn_only {params.non_default} 1> $WD/{log.stdout} 2> $WD/{log.stderr} && returncode=$? || returncode=$?
         if [ $returncode -gt 0 ]
         then
             echo -e "\\n#### [$(date)]\\tmitobim exited with an error - moving on - for details see: $WD/{log.stderr}" 1>> $WD/{log.stdout}
