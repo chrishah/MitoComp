@@ -7,6 +7,12 @@ __default__:
    e: $(pwd)/log/sge-%j.err
    pe: mpi1node
    q: mpi
+all:
+   N: ALL
+assembly_only:
+   N: ASSEMBLY
+prep_local_reads:
+   N: PLR
 fastqdump:
    N: FASTQD
    h_vmem: 10G

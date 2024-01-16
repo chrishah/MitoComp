@@ -11,6 +11,15 @@ __default__:
    qos: skylake_0096
    output: $(pwd)/log/slurm-%j.out
    error: $(pwd)/log/slurm-%j.err
+all:
+   job-name: ALL
+   time: "00:00:05"
+assembly_only:
+   job-name: ASSEMBLY
+   time: "00:00:05"
+prep_local_reads:
+   job-name: PLR
+   time: "00:10:00"
 fastqdump:
    job-name: FASTQD
    mem: 10G
