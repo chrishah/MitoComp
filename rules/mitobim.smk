@@ -33,7 +33,6 @@ rule MITObim:
     threads: config["threads"]["mitobim"] 
     shell:
         """
-        if [[ ! -d output/gathered_assemblies/ ]]; then mkdir output/gathered_assemblies/; fi
         WD=$(pwd)
         if [ -d {params.outdir} ]; then rm -rf {params.outdir}; fi
         mkdir -p {params.outdir}

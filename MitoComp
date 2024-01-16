@@ -88,6 +88,7 @@ exit 0
 fi
 export RUNMODE
 if [[ $RUNMODE == "assembly" ]]; then
+        if [[ ! -d output/gathered_assemblies/ ]]; then mkdir -p output/gathered_assemblies/; fi
         if [[ $CLUSTER == "slurm" ]]; then
                   export CONDA_PKGS_DIRS="$(pwd)/.conda_pkg_tmp"
                   mkdir -p .conda_pkg_tmp
@@ -120,6 +121,7 @@ elif [[ $RUNMODE == "annotate" ]]; then
                   exit 1
           fi
 elif [[ $RUNMODE == "all" ]]; then
+        if [[ ! -d output/gathered_assemblies/ ]]; then mkdir -p output/gathered_assemblies/; fi
         if [[ $CLUSTER == "slurm" ]]; then
                   export CONDA_PKGS_DIRS="$(pwd)/.conda_pkg_tmp"
                   mkdir -p .conda_pkg_tmp

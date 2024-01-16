@@ -39,7 +39,6 @@ rule mitoflex:
     singularity: "docker://samlmg/mitoflex:v0.2.9"
     shell:
         """
-        if [[ ! -d output/gathered_assemblies/ ]]; then mkdir output/gathered_assemblies/; fi
         cd {params.outdir}
         export HOME="{params.wd}/bin/MitoFlex"
 

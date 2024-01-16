@@ -18,7 +18,6 @@ rule get_organelle:
     shell:
         """
         # run getorganelle - capture returncode, so if it fails, the pipeline won't stop
-        if [[ ! -d output/gathered_assemblies/ ]]; then mkdir output/gathered_assemblies/; fi
         get_organelle_from_reads.py -1 {input.f} -2 {input.r} -o {params.outdir} -F {params.type} -t {threads} -R {params.rounds} -s {params.seed} 1> {log.stdout} 2> {log.stderr} && returncode=$? || returncode=$?
         if [ $returncode -gt 0 ]
         then

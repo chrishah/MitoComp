@@ -1,6 +1,8 @@
 rule NOVOconfig:
     input:
         "bin/NOVOconfig.txt",
+        f = get_reads_for_assembly_fw,
+        r = get_reads_for_assembly_rv,
     output:
         "output/{id}/assemblies/{sub}/novoplasty/NOVOconfig_{id}_{sub}.txt"
     params:
@@ -8,14 +10,12 @@ rule NOVOconfig:
         WD = os.getcwd(),
         seed = get_seed,
         log = "output/{id}/assemblies/{sub}/novoplasty/NOVOconfig_{id}_{sub}_log.txt",
-        f = get_reads_for_assembly_fw,
-        r = get_reads_for_assembly_rv,
         kmer = get_kmer,
         Read_length = get_readlength
     shell:
         """
-        forward=$(realpath {params.WD}/{params.f})
-        reverse=$(realpath {params.WD}/{params.r})
+        forward=$(realpath {params.WD}/{input.f})
+        reverse=$(realpath {params.WD}/{input.r})
 
         cp {input[0]} {output}
         sed -i 's?^Project name.*?Project name = {params.project_name}?g' {output}
@@ -44,7 +44,6 @@ rule NOVOplasty:
     singularity: "docker://reslp/novoplasty:4.2"
     shell:
         """
-        if [[ ! -d output/gathered_assemblies/ ]]; then mkdir output/gathered_assemblies/; fi
         WD=$(pwd)
             # if novoplasty was run before, remove the previous run
             if [ -d {params.outdir} ]; then rm -rf {params.outdir}; fi

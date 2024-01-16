@@ -14,7 +14,6 @@ rule norgal:
     singularity: "docker://reslp/norgal:1.0"
     shell:
         """
-        if [[ ! -d output/gathered_assemblies/ ]]; then mkdir output/gathered_assemblies/; fi
         WD=$(pwd)
         # add a directory from the container to the PATH, so norgal finds all necessary executables
         export PATH="/software/norgal/binaries/linux:$PATH"
