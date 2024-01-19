@@ -99,70 +99,63 @@ def get_rounds(wildcards):
 def gather_assemblies(wildcards):
         return  glob.glob("output/gathered_assemblies/*.fasta")
 
+
+# determine which conbinations to process
+# if assembly or all - do all combinations that are possilbe
+# if annotate - read in from gathered assembly and only do those
+to_process = {"id": [], "sub": [], "assembler": []}
+if os.environ["RUNMODE"] == "annotate":
+    for f in glob.glob("output/gathered_assemblies/*.fasta"):
+        (i,s,a) = os.path.basename(f).split(".")[:-1]
+        if (i in IDS) and (s in sub) and (a in Assembler):
+            to_process["id"].append(i)
+            to_process["sub"].append(s)
+            to_process["assembler"].append(a)
+else:
+        for i in IDS:
+            for s in sub:
+                for a in Assembler:    
+                    to_process["id"].append(i)
+                    to_process["sub"].append(s)
+                    to_process["assembler"].append(a)
+
 ##use this instead of expand to input all mitos.done files for annotation_stats rule
 
 def pick_stats(wildcards):
     pull_list = []
-    if os.environ["RUNMODE"] == "annotate":
-        for f in glob.glob("output/gathered_assemblies/*.fasta"):
-            (i,s,a) = os.path.basename(f).split(".")[:-1]
-            pull_list.append("output/"+i+"/annotation/mitos/"+i+"."+s+"."+a+".mitos.done")
-        return pull_list
-    else:
-        pull_list = []
-        for i in IDS:
-            for s in sub:
-                for a in Assembler:
-                    pull_list.append("output/"+i+"/annotation/mitos/"+i+"."+s+"."+a+".mitos.done")
-        PULL_LIST = pull_list
-        return PULL_LIST 
+    for j in range(len(to_process["id"])):
+        i = to_process["id"][j]
+        s = to_process["sub"][j]
+        a = to_process["assembler"][j]
+        pull_list.append("output/"+i+"/annotation/mitos/"+i+"."+s+"."+a+".mitos.done")
+    return pull_list
 
 ##use this instead of expand to input all second_mitos.done files for gene_positions rule
 
 def pick_mitos2(wildcards):
     pull_list = []
-    if os.environ["RUNMODE"] == "annotate":
-        for f in glob.glob("output/gathered_assemblies/*.fasta"):
-            (i,s,a) = os.path.basename(f).split(".")[:-1]
-            pull_list.append("output/"+i+"/annotation/second_mitos/"+i+"."+s+"."+a+".second_mitos.done")
-        return pull_list
-    else:
-        pull_list = []
-        for i in IDS:
-            for s in sub:
-                for a in Assembler:
-                    pull_list.append("output/"+i+"/annotation/second_mitos/"+i+"."+s+"."+a+".second_mitos.done")
-        PULL_LIST = pull_list
-        return PULL_LIST 
+    for j in range(len(to_process["id"])):
+        i = to_process["id"][j]
+        s = to_process["sub"][j]
+        a = to_process["assembler"][j]
+        pull_list.append("output/"+i+"/annotation/second_mitos/"+i+"."+s+"."+a+".second_mitos.done")
+    return pull_list
 
 ##use this as the driver to pick runmode from report rule
 
 def pick_mode(wildcards):
     pull_list = []
-    if os.environ["RUNMODE"] == "annotate":
-        for f in glob.glob("output/gathered_assemblies/*.fasta"):
-            (i,s,a) = os.path.basename(f).split(".")[:-1]
-            pull_list.append("output/"+i+"/annotation/compare/CCT/"+i+"."+s+"."+a+".CCT.done")
-        print("Mode is 'annotate': ", len(pull_list), "target files.")
-        for f in pull_list:
-            print(f)
-        return pull_list
-    elif os.environ["RUNMODE"] == "assembly":
-        for i in IDS:
-            for s in sub:
-                for a in Assembler:    
-                    pull_list.append("output/"+i+"/assemblies/"+s+"/"+a+"/"+a+".ok")
-        print("Mode is 'assembly': ", len(pull_list), "target files.")
-        for f in pull_list:
-            print(f)
-        return pull_list
-    else:
-        pull_list = []
-        for i in IDS:
-            for s in sub:
-                for a in Assembler:
-                    pull_list.append("output/"+i+"/annotation/compare/CCT/"+i+"."+s+"."+a+".CCT.done")
-        PULL_LIST = pull_list
-        print("Mode is 'all': ", len(PULL_LIST), "target files.")
-        return PULL_LIST 
+    for j in range(len(to_process["id"])):
+        i = to_process["id"][j]
+        s = to_process["sub"][j]
+        a = to_process["assembler"][j]
+        pull_list.append("output/"+i+"/annotation/compare/CCT/"+i+"."+s+"."+a+".CCT.done")
 
+    if os.environ["RUNMODE"] == "annotate":
+        print("Mode is 'annotate': ", len(pull_list), "target files.")
+    else:
+        print("Mode is 'all': ", len(pull_list), "target files.")
+    
+    for f in pull_list:
+        print(f)
+    return pull_list

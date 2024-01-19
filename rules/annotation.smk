@@ -38,7 +38,7 @@ rule mitos:
         """
         if [[ ! -d {params.outdir} ]]; then mkdir {params.outdir}; fi
         if [[ -f {params.fasta} ]]; then
-            runmitos.py -i {params.fasta} -o {params.outdir} -r dbs/mitos/mitos1-refdata -c {params.genetic_code}
+            runmitos.py -i {params.fasta} -o {params.outdir} -r dbs/mitos/mitos1-refdata -c {params.genetic_code} 1>> {log.stdout} 2>> {log.stderr}
         else
             echo "Mitos could not be run because the input file is missing. Maybe the assembler did not produce output?" >> {log.stderr}
         fi

@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 
-configfile: "data/config.yaml"
 sample_data = pd.read_table(config["samples"], sep=",").set_index("ID", drop=False)
 
 include: "rules/functions.smk"

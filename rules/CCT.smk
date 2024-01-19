@@ -1,6 +1,6 @@
 rule gbk_prep:
     input:
-        pick_mitos2
+        rules.second_mitos.output
     output:
         "output/{id}/annotation/compare/CCT/{id}.{sub}.{assembler}.gbk.done"
     params:
@@ -37,7 +37,7 @@ rule gbk_prep:
 
 rule CCT:
     input:
-        "output/{id}/annotation/compare/CCT/{id}.{sub}.{assembler}.gbk.done"
+        rules.gbk_prep.output
     output:
         "output/{id}/annotation/compare/CCT/{id}.{sub}.{assembler}.CCT.done",
     params:

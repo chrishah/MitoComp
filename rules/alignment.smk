@@ -33,7 +33,6 @@ rule roll:
 rule reverse_complement:
     input:
         rules.roll.output,
-        RC_assemblies = "output/stats/RC_assemblies.txt"
     output:
         "output/{id}/annotation/alignment/RC.done"
     singularity:
