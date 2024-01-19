@@ -23,7 +23,7 @@ rule MITObim:
         wd = os.getcwd(),
 	end = config["Assembler_options"]["mitobim"]["iterations"],
 	non_default = config["Assembler_options"]["mitobim"]["non_default"],
-        outdir = "output/{id}/assemblies/{sub}/mitobim/run"
+        outdir = "output/{id}/assemblies/{sub}/mitobim"
     log: 
         stdout = "output/{id}/assemblies/{sub}/mitobim/stdout.txt",
         stderr = "output/{id}/assemblies/{sub}/mitobim/stderr.txt"
@@ -33,16 +33,16 @@ rule MITObim:
     threads: config["threads"]["mitobim"] 
     shell:
         """
-        WD=$(pwd)
-        if [ -d {params.outdir} ]; then rm -rf {params.outdir}; fi
-        mkdir -p {params.outdir}
-        cd {params.outdir}
+        if [ -d {params.outdir}/run ]; then rm -rf {params.outdir}/run; fi
+        mkdir -p {params.outdir}/run
+        cd {params.outdir}/run
         
         # run mitobim - capture returncode, so if it fails, the pipeline won't stop
-        MITObim.pl -sample {params.id} -ref seed -readpool $WD/{input} --quick $WD/{params.seed} -end {params.end} --NFS_warn_only {params.non_default} 1> $WD/{log.stdout} 2> $WD/{log.stderr} && returncode=$? || returncode=$?
+        MITObim.pl -sample {params.id} -ref seed -readpool {params.wd}/{input} --quick {params.wd}/{params.seed} -end {params.end} --NFS_warn_only {params.non_default} 1> {params.wd}/{log.stdout} 2> {params.wd}/{log.stderr} && returncode=$? || returncode=$?
         if [ $returncode -gt 0 ]
         then
-            echo -e "\\n#### [$(date)]\\tmitobim exited with an error - moving on - for details see: $WD/{log.stderr}" 1>> $WD/{log.stdout}
+            echo -e "\\n#### [$(date)]\\tmitobim exited with an error - moving on - for details see: {params.wd}/{log.stderr}" 1>> {params.wd}/{log.stdout}
+            touch ../{wildcards.id}.{wildcards.sub}.mitobim.fasta.error
         fi
 
         #if the expected final assembly exists, get a copy
@@ -50,16 +50,18 @@ rule MITObim:
         # check if the search returned only one file and copy if yes
         if [[ -z $final_fasta ]]
         then
-            echo -e "\\n#### [$(date)]\\tmitobim has not produced a final assembly - moving on" 1>> $WD/{log.stdout}
-            touch $WD/{params.outdir}/../{wildcards.id}.{wildcards.sub}.mitobim.fasta.missing
+            echo -e "\\n#### [$(date)]\\tmitobim has not produced a final assembly - moving on" 1>> {params.wd}/{log.stdout}
+            touch ../{wildcards.id}.{wildcards.sub}.mitobim.fasta.missing
         elif [ "$(echo $final_fasta | tr ' ' '\\n' | wc -l)" -eq 1 ] && [ $(grep "^>" $final_fasta | wc -l) -eq 1 ]
         then
-            cp $WD/{params.outdir}/$final_fasta $WD/{params.outdir}/../{wildcards.id}.{wildcards.sub}.mitobim.fasta
-            cp $WD/{params.outdir}/$final_fasta $WD/output/gathered_assemblies/{wildcards.id}.{wildcards.sub}.mitobim.fasta
+            echo -e "\\n#### [$(date)]\\tmitobim seems to have produced a final assembly - Kudos!" 1>> {params.wd}/{log.stdout}
+            cp {params.wd}/{params.outdir}/run/$final_fasta ../{wildcards.id}.{wildcards.sub}.mitobim.fasta
+            echo -e "\\n#### [$(date)]\\tfind a copy of the assembly at: {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.mitobim.fasta" 1>> {params.wd}/{log.stdout}
+            cp {params.wd}/{params.outdir}/run/$final_fasta {params.wd}/output/gathered_assemblies/{wildcards.id}.{wildcards.sub}.mitobim.fasta
         else
-            echo -e "\\n#### [$(date)]\\tmitobim seems to have produced multiple assemblies or assemblies containing multiple sequences - don't know which to pick - moving on" 1>> {log.stdout}
-            touch {params.outdir}/../{wildcards.id}.{wildcards.sub}.mitobim.fasta.missing
+            echo -e "\\n#### [$(date)]\\tmitobim seems to have produced multiple assemblies or assemblies containing multiple sequences - don't know which to pick - moving on" 1>> {params.wd}/{log.stdout}
+            touch ../{wildcards.id}.{wildcards.sub}.mitobim.fasta.needs_attention
         fi
-        touch $WD/{output.ok}       
+        touch {params.wd}/{output.ok}       
         """
 

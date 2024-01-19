@@ -7,20 +7,20 @@ rule NOVOconfig:
         "output/{id}/assemblies/{sub}/novoplasty/NOVOconfig_{id}_{sub}.txt"
     params:
         project_name = "{id}_{sub}",
-        WD = os.getcwd(),
+        wd = os.getcwd(),
         seed = get_seed,
         log = "output/{id}/assemblies/{sub}/novoplasty/NOVOconfig_{id}_{sub}_log.txt",
         kmer = get_kmer,
         Read_length = get_readlength
     shell:
         """
-        forward=$(realpath {params.WD}/{input.f})
-        reverse=$(realpath {params.WD}/{input.r})
+        forward=$(realpath {params.wd}/{input.f})
+        reverse=$(realpath {params.wd}/{input.r})
 
         cp {input[0]} {output}
         sed -i 's?^Project name.*?Project name = {params.project_name}?g' {output}
-        sed -i 's?^Seed Input.*?Seed Input = {params.WD}/{params.seed}?g' {output}
-        sed -i 's?^Extended log.*?Extended log = {params.WD}/{params.log}?g' {output}
+        sed -i 's?^Seed Input.*?Seed Input = {params.wd}/{params.seed}?g' {output}
+        sed -i 's?^Extended log.*?Extended log = {params.wd}/{params.log}?g' {output}
         sed -i "s?^Forward reads.*?Forward reads = $forward?g" {output}
         sed -i "s?^Reverse reads.*?Reverse reads = $reverse?g" {output}
         sed -i 's?^K-mer.*?K-mer = {params.kmer}?g' {output}
@@ -35,6 +35,7 @@ rule NOVOplasty:
     output: 
         ok = "output/{id}/assemblies/{sub}/novoplasty/novoplasty.ok"
     params:
+        wd = os.getcwd(),
         outdir = "output/{id}/assemblies/{sub}/novoplasty/run"
     log:
         stdout = "output/{id}/assemblies/{sub}/novoplasty/stdout.txt",
@@ -44,16 +45,16 @@ rule NOVOplasty:
     singularity: "docker://reslp/novoplasty:4.2"
     shell:
         """
-        WD=$(pwd)
-            # if novoplasty was run before, remove the previous run
-            if [ -d {params.outdir} ]; then rm -rf {params.outdir}; fi
-        mkdir -p {params.outdir}
-        cd {params.outdir}
+        # if novoplasty was run before, remove the previous run
+        if [ -d {params.outdir}/run ]; then rm -rf {params.outdir}/run; fi
+        mkdir -p {params.outdir}/run
+        cd {params.outdir}/run
 
-        NOVOPlasty.pl -c $WD/{input.config} 1> $WD/{log.stdout} 2> $WD/{log.stderr} && returncode=$? || returncode=$?
+        NOVOPlasty.pl -c {params.wd}/{input.config} 1> {params.wd}/{log.stdout} 2> {params.wd}/{log.stderr} && returncode=$? || returncode=$?
         if [ $returncode -gt 0 ]
         then
-            echo -e "\\n#### [$(date)]\\tnovoplasty exited with an error - moving on - for details see: $WD/{log.stderr}" 1>> $WD/{log.stdout}
+            echo -e "\\n#### [$(date)]\\tnovoplasty exited with an error - moving on - for details see: {params.wd}/{log.stderr}" 1>> {params.wd}/{log.stdout}
+            touch {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.novoplasty.fasta.error
         fi
 
         # find the expected final assembly file
@@ -61,15 +62,17 @@ rule NOVOplasty:
         # check if the variable is empty
         if [[ -z $final_fasta ]]
         then
-            echo -e "\\n#### [$(date)]\\tnovoplasty has not produced a circularized assembly - moving on" 1>> $WD/{log.stdout}
-            touch $WD/{params.outdir}/../{wildcards.id}.{wildcards.sub}.novoplasty.fasta.missing
+            echo -e "\\n#### [$(date)]\\tnovoplasty has not produced a circularized assembly - moving on" 1>> {params.wd}/{log.stdout}
+            touch {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.novoplasty.fasta.missing
         elif [ "$(echo $final_fasta | tr ' ' '\\n' | wc -l)" -eq 1 ] && [ $(grep "^>" $final_fasta | wc -l) -eq 1 ]
         then
-            cp $WD/{params.outdir}/$final_fasta $WD/{params.outdir}/../{wildcards.id}.{wildcards.sub}.novoplasty.fasta
-            cp $WD/{params.outdir}/$final_fasta $WD/output/gathered_assemblies/{wildcards.id}.{wildcards.sub}.novoplasty.fasta
+            echo -e "\\n#### [$(date)]\\tnovoplasty seems to have produced a circularized assembly - Kudos!" 1>> {params.wd}/{log.stdout}
+            cp {params.wd}/{params.outdir}/run/$final_fasta {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.novoplasty.fasta
+            echo -e "\\n#### [$(date)]\\tfind a copy of the assembly at: {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.novoplasty.fasta" 1>> {params.wd}/{log.stdout}
+            cp {params.wd}/{params.outdir}/run/$final_fasta {params.wd}/output/gathered_assemblies/{wildcards.id}.{wildcards.sub}.novoplasty.fasta
         else
-            echo -e "\\n#### [$(date)]\\tnovoplasty seems to have produced multiple circularized assemblies or assemblies containing multiple sequences - don't know which to pick - moving on" 1>> $WD/{log.stdout}
-            touch {params.outdir}/../{wildcards.id}.{wildcards.sub}.novoplasty.fasta.missing
+            echo -e "\\n#### [$(date)]\\tnovoplasty seems to have produced multiple circularized assemblies or assemblies containing multiple sequences - don't know which to pick - moving on" 1>> {params.wd}/{log.stdout}
+            touch {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.novoplasty.fasta.needs_attention
         fi
-        touch $WD/{output.ok}
+        touch {params.wd}/{output.ok}
         """

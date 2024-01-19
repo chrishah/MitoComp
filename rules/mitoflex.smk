@@ -47,6 +47,7 @@ rule mitoflex:
         if [ $returncode -gt 0 ]
         then
             echo -e "\\n#### [$(date)]\\tmitoflex exited with an error - moving on - for details see: {params.wd}/{log.stderr}" 1>> {params.wd}/{log.stdout}
+            touch {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.mitoflex.fasta.error
         fi
  
         #if the expected final assembly exists, get a copy
@@ -58,11 +59,13 @@ rule mitoflex:
             touch {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.mitoflex.fasta.missing
         elif [ "$(echo $final_fasta | tr ' ' '\\n' | wc -l)" -eq 1 ] && [ $(grep "^>" $final_fasta | wc -l) -eq 1 ]
         then
+            echo -e "\\n#### [$(date)]\\tmitoflex seems to have produced a final assembly - Kudos!" 1>> {params.wd}/{log.stdout}
             cp {params.wd}/{params.outdir}/$final_fasta {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.mitoflex.fasta
+            echo -e "\\n#### [$(date)]\\tfind a copy of the assembly at: {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.mitoflex.fasta" 1>> {params.wd}/{log.stdout}
             cp {params.wd}/{params.outdir}/$final_fasta {params.wd}/output/gathered_assemblies/{wildcards.id}.{wildcards.sub}.mitoflex.fasta
         else
             echo -e "\\n#### [$(date)]\\tmitoflex seems to have produced multiple assemblies or assemblies containing multiple sequences - don't know which to pick - moving on" 1>> {params.wd}/{log.stdout}
-            touch {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.mitoflex.fasta.missing
+            touch {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.mitoflex.fasta.needs_attention
         fi
         touch {params.wd}/{output.ok}
         """
