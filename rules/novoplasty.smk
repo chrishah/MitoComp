@@ -68,7 +68,7 @@ rule NOVOplasty:
             cp $WD/{params.outdir}/$final_fasta $WD/{params.outdir}/../{wildcards.id}.{wildcards.sub}.novoplasty.fasta
             cp $WD/{params.outdir}/$final_fasta $WD/output/gathered_assemblies/{wildcards.id}.{wildcards.sub}.novoplasty.fasta
         else
-            echo -e "\\n#### [$(date)]\\tnovoplasty seems to have produced multiple circularized assemblies or assemblies containing multiple sequences - don't know which to pick - moving on" 1>> {log.stdout}
+            echo -e "\\n#### [$(date)]\\tnovoplasty seems to have produced multiple circularized assemblies or assemblies containing multiple sequences - don't know which to pick - moving on" 1>> $WD/{log.stdout}
             touch {params.outdir}/../{wildcards.id}.{wildcards.sub}.novoplasty.fasta.missing
         fi
         touch $WD/{output.ok}
