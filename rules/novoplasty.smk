@@ -42,7 +42,6 @@ rule NOVOplasty:
         stderr = "output/{id}/assemblies/{sub}/novoplasty/stderr.txt"
     benchmark: "output/{id}/assemblies/{sub}/novoplasty/{id}.{sub}.novoplasty.benchmark.txt"
     threads: config["threads"]["novoplasty"] 
-#    threads: per_sample_config["Sy04"]["threads"]["novoplasty"] 
     singularity: "docker://reslp/novoplasty:4.2"
     shell:
         """
