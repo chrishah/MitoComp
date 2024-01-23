@@ -1,14 +1,3 @@
-def trimin_forward(wildcards):
-        if sample_data.loc[(wildcards.id), ["SRA"]].any():
-            return "output/{id}/reads/downloaded_reads/"+wildcards.id+"_1.fastq.gz"
-        else:
-            return "output/{id}/reads/local_reads/"+wildcards.id+"_1.fastq.gz"
-def trimin_reverse(wildcards):
-        if sample_data.loc[(wildcards.id), ["SRA"]].any():
-            return "output/{id}/reads/downloaded_reads/"+wildcards.id+"_2.fastq.gz"
-        else:
-            return "output/{id}/reads/local_reads/"+wildcards.id+"_2.fastq.gz"
-
 rule trimgalore:
         input:
                 f = trimin_forward,
