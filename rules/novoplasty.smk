@@ -36,12 +36,13 @@ rule NOVOplasty:
         ok = "output/{id}/assemblies/{sub}/novoplasty/novoplasty.ok"
     params:
         wd = os.getcwd(),
-        outdir = "output/{id}/assemblies/{sub}/novoplasty/run"
+        outdir = "output/{id}/assemblies/{sub}/novoplasty/"
     log:
         stdout = "output/{id}/assemblies/{sub}/novoplasty/stdout.txt",
         stderr = "output/{id}/assemblies/{sub}/novoplasty/stderr.txt"
     benchmark: "output/{id}/assemblies/{sub}/novoplasty/{id}.{sub}.novoplasty.benchmark.txt"
     threads: config["threads"]["novoplasty"] 
+#    threads: per_sample_config["Sy04"]["threads"]["novoplasty"] 
     singularity: "docker://reslp/novoplasty:4.2"
     shell:
         """
@@ -57,6 +58,7 @@ rule NOVOplasty:
             touch {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.novoplasty.fasta.error
         fi
 
+        cd ..
         # find the expected final assembly file
         final_fasta=$(find ./ -name "Circularized_assembly*")
         # check if the variable is empty
@@ -67,9 +69,8 @@ rule NOVOplasty:
         elif [ "$(echo $final_fasta | tr ' ' '\\n' | wc -l)" -eq 1 ] && [ $(grep "^>" $final_fasta | wc -l) -eq 1 ]
         then
             echo -e "\\n#### [$(date)]\\tnovoplasty seems to have produced a circularized assembly - Kudos!" 1>> {params.wd}/{log.stdout}
-            cp {params.wd}/{params.outdir}/run/$final_fasta {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.novoplasty.fasta
+            ln -sf $final_fasta {wildcards.id}.{wildcards.sub}.novoplasty.fasta
             echo -e "\\n#### [$(date)]\\tfind a copy of the assembly at: {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.novoplasty.fasta" 1>> {params.wd}/{log.stdout}
-            cp {params.wd}/{params.outdir}/run/$final_fasta {params.wd}/output/gathered_assemblies/{wildcards.id}.{wildcards.sub}.novoplasty.fasta
         else
             echo -e "\\n#### [$(date)]\\tnovoplasty seems to have produced multiple circularized assemblies or assemblies containing multiple sequences - don't know which to pick - moving on" 1>> {params.wd}/{log.stdout}
             touch {params.wd}/{params.outdir}/{wildcards.id}.{wildcards.sub}.novoplasty.fasta.needs_attention
