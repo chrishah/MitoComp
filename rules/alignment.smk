@@ -53,12 +53,14 @@ rule align:
     output:
         "output/{id}/annotation/alignment/clustalo/{id}.align.done"
     params:
+        wd = os.getcwd(),
         id = "{id}"
     singularity: "docker://reslp/clustalo:1.2.4" 
     threads: config["threads"]["alignment"]
     shell:
         """
 	cd output/{params.id}/annotation/alignment
+
 	# cp has to fail silently of no RC file is found
         if [[ $(find {params.id}.*.rolled*.fasta) ]]; then
             cp {params.id}.*.rolled*.fasta clustalo/ 2>/dev/null || :
@@ -69,15 +71,13 @@ rule align:
             no_assemblies=$(find {params.id}.*.rolled*.fasta | wc -l)
 	    if [[ "$no_assemblies" -gt 1 ]]; then 
 	    	cat {params.id}*.fasta > all_{params.id}_assemblies.fasta
-            	clustalo -i all_{params.id}_assemblies.fasta -o {params.id}_alignment.fa --threads={threads}
-            	touch {params.id}.align.done
+            	clustalo -i all_{params.id}_assemblies.fasta -o {params.id}_alignment.fa --threads={threads} --force
 	    else
 		echo "There is only a single assembly for this ID so cannot align"
-		touch {params.id}.align.done
+                cat ../{params.id}.*.rolled*.fasta > {params.id}_alignment.fa
 	    fi
         else
             echo "Align could not be run because the input file is missing. This may happen when the assembler did not produce output or when MITOS did not find the most found gene in this assembly. This may also occur if there is only a single assembly for this ID"
-            cd ../../../../
-            touch {output}
         fi
+        touch {params.wd}/{output}
         """
