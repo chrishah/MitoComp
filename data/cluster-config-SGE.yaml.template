@@ -49,12 +49,16 @@ interleave:
 MITObim:
    N: MITOB
    h_vmem: 20G
+MITObim_circules:
+   N: MITOC
 mitos_ref_db:
    N: MITRDB
 mitos:
    N: MITOS
 annotation_stats:
    N: ANNS 
+annotation_statsII:
+   N: ANNSII
 roll:
    N: ROLL
 align:

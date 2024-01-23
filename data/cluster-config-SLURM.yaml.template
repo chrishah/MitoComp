@@ -59,6 +59,9 @@ MITObim:
    job-name: MITOB
    mem: 20G
    time: "24:00:00"
+MITObim_circules:
+   job-name: MITOC
+   time: "00:10:00"
 roll:
    job-name: ROLL
 reverse_complement:
@@ -75,6 +78,8 @@ mitos:
    job-name: MITOS
 annotation_stats:
    job-name: ANNSTAT
+annotation_statsII:
+   job-name: ANNSTATII
 gbk_prep:
    job-name: GBKPREP
 CCT:

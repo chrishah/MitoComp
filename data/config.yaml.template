@@ -1,13 +1,36 @@
 samples: "data/data.csv"
 
-skip_trimming: #"yes"
+################################## not functional right now
+#fill out if you only have one sample to process - the following four lines will be ignored and the information in the samples file takes precedence
+ID: 
+forward: 
+reverse: 
+SRA:
+#################################
+
+###### general section
+###### the following settings will be applied to all samples unless specified otherwise in the sample file
 sub: ["5000000", "10000000", "20000000", "all"]
-Assembler: ["mitobim","novoplasty","getorganelle"] #["norgal", "getorganelle", "mitoflex", "novoplasty", "mitobim"]
+seed: 
+Assembler: ["norgal", "getorganelle", "mitoflex", "novoplasty", "mitobim"]
 Assembler_options:
     mitobim:
         iterations: 50
-        non_default: "--clean" 
-
+        non_default: "--clean"
+    mitoflex:
+        clade: "Chordata" # options are: Mollusca,Arthropoda,Annelida,Chordata,Porifera,Platyhelminthes,Nemertea,Bryozoa,Echinodermata,Nematoda 
+        code: 2 # genetic code number
+        non_default: "--level debug"
+    novoplasty:
+        kmer: 39
+        readlength: 151
+        non_default: ""
+    getorganelle:
+        type: "animal_mt" # options are: embplant_pt/other_pt/embplant_mt/embplant_nr/animal_mt/fungus_mt/anonym/embplant_pt,embplant_mt/other_pt,embplant_mt,fungus_mt
+        GO_rounds: 10
+        non_default: ""
+    norgal:
+        non_default: "--blast"
 threads:
     download: 2
     trimmomatic: 4
@@ -23,10 +46,12 @@ threads:
     alignment: 4        
 
 trimming:
-    software: "trimgalore" #, "trimgalore"]
+    skip: #"yes"
+    software: "trimgalore" # either "trimmomatic" or "trimgalore"
     trimgalore_options:
         parameters: "--paired --length 70 -r1 71 -r2 71 --retain_unpaired --stringency 2 --quality 30"
     trimmomatic_options:
+        adapter: "adapterseq/TruSeq3-PE.fa"
         minlength: 40 
         windowsize: 5
         stepsize: 4

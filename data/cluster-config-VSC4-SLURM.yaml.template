@@ -56,8 +56,11 @@ interleave:
    mem: 10G
    ntasks: 2
 MITObim:
-   job-name: BIM
+   job-name: MITOB
    mem: 20G
+MITObim_circules:
+   job-name: MITOC
+   time: "00:10:00"
 mitos_ref_db:
    job-name: MITRDB
 mitos:
@@ -68,6 +71,8 @@ gene_positions:
    job-name: GPOS
 annotation_stats:
    job-name: ANNS
+annotation_statsII:
+   job-name: ANNSII
 roll:
    job-name: ROLL
 align:
