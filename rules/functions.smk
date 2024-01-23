@@ -1,29 +1,139 @@
 import os
 import pandas as pd
 import glob
+import copy
+import yaml
+import numpy as np
 
-IDS = sample_data.index.values.tolist()
-Assembler = config["Assembler"] 
-sub = config["sub"]
+per_sample_config = {}
+if os.path.exists(str(config["samples"])):
+    sample_data = pd.read_table(config["samples"], sep=",", na_values=None).set_index("ID", drop=False)
+    IDS = sample_data.index.values.tolist()
+    ind_options = {'ID': "ID",
+        'forward': "forward",
+        'reverse': "reverse",
+        'Assembler': 'Assembler',
+        'seed': "seed",
+        'SRA': "SRA", 
+        'Clade': "Assembler_options:mitoflex:clade",
+        'Code': "Assembler_options:mitoflex:code",
+        'novoplasty_kmer': "Assembler_options:novoplasty:kmer",
+        'Read_length': "Assembler_options:novoplasty:readlength",
+        'Adapter': "trimming:trimmomatic_options:adapter",
+        'Type': "Assembler_options:getorganelle:type",
+        'GO_Rounds': "Assembler_options:getorganelle:GO_rounds"}
+    
+    #remove irrelevant columns from list
+    present = list(ind_options.keys())
+    for c in present:
+        if not c in sample_data.columns:
+            print(c+" is not in there - remove from list")
+            del(ind_options[c])
+    present = ind_options.keys()
+    
+    for ID in IDS:
+        print(ID)
+        if "sample_config" in sample_data.columns and os.path.exists(str(sample_data.loc[ID]["sample_config"])):
+            yamlfile = sample_data.loc[ID]["sample_config"]
+            print("attempting to read in sample specific config file - expecting yaml: "+str(yamlfile))
+            with open(yamlfile) as f:
+                per_sample_config[ID] = yaml.safe_load(f)
+            continue
+        per_sample_config[ID] = copy.deepcopy(config)
+        print(per_sample_config[ID])
+        print("checking for individual options")
+        for c in present:
+            print(c)
+            li = ind_options[c].split(":")
+            print(li,len(li))
+            if len(li) == 1:
+                print("level 1:")
+                if isinstance(per_sample_config[ID][li[0]], str):
+                    in_config = str(per_sample_config[ID][li[0]])
+                    in_data = str(sample_data.loc[ID][c])
+                    print("in config: "+in_config)
+                    print("in data: "+in_data)
+                elif isinstance(per_sample_config[ID][li[0]], list):
+                    in_config = sorted(per_sample_config[ID][li[0]])
+                    print(sample_data.loc[ID][c])
+                    print(type(sample_data.loc[ID][c]))
+                    if str(sample_data.loc[ID][c]) == "nan":
+                        print("Nonetype")
+                        in_data = str(sample_data.loc[ID][c])
+                    else:
+                        print("splitting")
+                        in_data = sorted(str(sample_data.loc[ID][c]).split("|"))
+                    print("in config: "+str(in_config))
+                    print("in data: "+str(in_data))
+                elif isinstance(per_sample_config[ID][li[0]], type(None)):
+                    print("Found NoneType: "+str(per_sample_config[ID][li[0]]))
+                    in_config = str(per_sample_config[ID][li[0]])
+                    in_data = str(sample_data.loc[ID][c])
+                    print("in config: "+in_config)
+                    print("in data: "+in_data)
+                if in_config != in_data and in_data != "nan":
+                    print("need to update with: "+str(in_data))
+                    per_sample_config[ID][li[0]] = in_data
+            elif len(li) == 2:
+                print("level 2:")
+                in_config = str(per_sample_config[ID][li[0]][li[1]])
+                in_data = str(sample_data.loc[ID][c])
+                print("in config: "+in_config)
+                print("in data: "+in_data)
+                if in_config != in_data:
+                    print("need to update: "+str(in_data))
+                    per_sample_config[ID][li[0]][li[1]] = in_data
+            elif len(li) == 3:
+                print("level 3:")
+                in_config = str(per_sample_config[ID][li[0]][li[1]][li[2]])
+                in_data = str(sample_data.loc[ID][c])
+                print("in config: "+in_config)
+                print("in data: "+in_data)
+                if in_config != in_data and in_data != "nan":
+                    print("need to update: "+str(in_data))
+                    per_sample_config[ID][li[0]][li[1]][li[2]] = in_data
+else:
+    IDS = [str(config["ID"])]
+    per_sample_config[str(config["ID"])] = config.copy()
+    
+           
+print("\n## See what's what")
+for ID in per_sample_config.keys():
+        print(ID+":")
+        print(per_sample_config[ID])
+
+#Assembler = config["Assembler"] 
+#sub = config["sub"]
 
 def get_accession(wildcards):
-        return sample_data.loc[(wildcards.id), ["SRA"]].values[0]
+        return per_sample_config[wildcards.id]["SRA"]
+
+def trimin_forward(wildcards):
+        if per_sample_config[wildcards.id]["SRA"]:
+            return "output/{id}/reads/downloaded_reads/"+wildcards.id+"_1.fastq.gz"
+        else:
+            return "output/{id}/reads/local_reads/"+wildcards.id+"_1.fastq.gz"
+def trimin_reverse(wildcards):
+        if per_sample_config[wildcards.id]["SRA"]:
+            return "output/{id}/reads/downloaded_reads/"+wildcards.id+"_2.fastq.gz"
+        else:
+            return "output/{id}/reads/local_reads/"+wildcards.id+"_2.fastq.gz"
 
 def get_seed(wildcards):
-        seedfile = sample_data.loc[(wildcards.id), ["seed"]].values[0]
+        seedfile = per_sample_config[wildcards.id]["seed"]
         #now we make sure that seedfile string to avoid problems with nan
         seedfile = str(seedfile)
         if os.path.exists(seedfile):
             return seedfile
         else:
-            print("The assemblers GetOrganelle, Novoplasty and Mitobim require a valid seed file. You don't seem to be providing one ('"+seedfile+"') for sample: "+wildcards.id+". Please doublecheck the column 'seed' in your "+config["samples"]+".")
+            print("WARNING:\nThe assemblers GetOrganelle, Novoplasty and Mitobim require a valid seed file. You don't seem to be providing one (currently: '"+seedfile+"') for sample: "+wildcards.id+". Please doublecheck.\n")
             os._exit(1)
 
 
 def get_reads_for_assembly_fw(wildcards):
 	if (wildcards.sub == "all"):
-		if (config["skip_trimming"] == "yes"):
-			if sample_data.loc[(wildcards.id), ["SRA"]].any():
+		if (per_sample_config[wildcards.id]["trimming"]["skip"] == "yes"):
+			if per_sample_config[wildcards.id]["SRA"]:
 				return "output/{id}/reads/downloaded_reads/"+wildcards.id+"_1.fastq.gz"
 			else:
 				return "output/{id}/reads/local_reads/"+wildcards.id+"_1.fastq.gz"
@@ -34,8 +144,8 @@ def get_reads_for_assembly_fw(wildcards):
 
 def get_reads_for_assembly_rv(wildcards):
 	if (wildcards.sub == "all"):
-		if (config["skip_trimming"] == "yes"):
-			if sample_data.loc[(wildcards.id), ["SRA"]].any():
+		if (per_sample_config[wildcards.id]["trimming"]["skip"] == "yes"):
+			if per_sample_config[wildcards.id]["SRA"]:
 				return "output/{id}/reads/downloaded_reads/"+wildcards.id+"_2.fastq.gz"
 			else:
 				return "output/{id}/reads/local_reads/"+wildcards.id+"_2.fastq.gz"
@@ -45,8 +155,8 @@ def get_reads_for_assembly_rv(wildcards):
 		return "output/{id}/reads/sub/{sub}/{id}_2.fastq.gz"
 
 def get_trimmed_reads_fw(wildcards):
-	if (config["skip_trimming"] == "yes"):
-		if sample_data.loc[(wildcards.id), ["SRA"]].any():
+	if (per_sample_config[wildcards.id]["trimming"]["skip"] == "yes"):
+		if per_sample_config[wildcards.id]["SRA"]:
 			return "output/{id}/reads/downloaded_reads/"+wildcards.id+"_1.fastq.gz"
 		else:
 			return "output/{id}/reads/local_reads/"+wildcards.id+"_1.fastq.gz"
@@ -54,8 +164,8 @@ def get_trimmed_reads_fw(wildcards):
 		return "output/{id}/reads/trimmed/"+config["trimming"]["software"]+"/{id}_1P_trim.fastq.gz"	
 
 def get_trimmed_reads_rv(wildcards):
-	if (config["skip_trimming"] == "yes"):
-		if sample_data.loc[(wildcards.id), ["SRA"]].any():
+	if (per_sample_config[wildcards.id]["trimming"]["skip"] == "yes"):
+		if per_sample_config[wildcards.id]["SRA"]:
 			return "output/{id}/reads/downloaded_reads/"+wildcards.id+"_2.fastq.gz"
 		else:
 			return "output/{id}/reads/local_reads/"+wildcards.id+"_2.fastq.gz"
@@ -64,10 +174,10 @@ def get_trimmed_reads_rv(wildcards):
 
 
 def get_clade(wildcards):
-        return sample_data.loc[(wildcards.id), ["Clade"]].dropna().values[0]
+        return per_sample_config[wildcards.id]["Assembler_options"]["mitoflex"]["clade"]
 
 def get_code(wildcards):
-        return sample_data.loc[(wildcards.id), ["Code"]].dropna().values[0]
+        return per_sample_config[wildcards.id]["Assembler_options"]["mitoflex"]["code"]
 
 def get_forward(wildcards):
         if len(sample_data.loc[(wildcards.id), ["forward"]].dropna()) == 0:
@@ -82,19 +192,19 @@ def get_reverse(wildcards):
                 return sample_data.loc[(wildcards.id), ["reverse"]].dropna().values[0]
 
 def get_kmer(wildcards):
-        return sample_data.loc[(wildcards.id), ["novoplasty_kmer"]].dropna().values[0]
+        return per_sample_config[wildcards.id]["Assembler_options"]["novoplasty"]["kmer"]
 
 def get_readlength(wildcards):
-        return sample_data.loc[(wildcards.id), ["Read_length"]].dropna().values[0]
+        return per_sample_config[wildcards.id]["Assembler_options"]["novoplasty"]["readlength"]
 
 def get_adapter(wildcards):
-        return sample_data.loc[(wildcards.id), ["Adapter"]].dropna().values[0]
+        return per_sample_config[wildcards.id]["trimming"]["trimmomatic_options"]["adapter"]
 
 def get_type(wildcards):
-        return sample_data.loc[(wildcards.id), ["Type"]].dropna().values[0]
+        return per_sample_config[wildcards.id]["Assembler_options"]["getorganelle"]["type"]
 
 def get_rounds(wildcards):
-        return sample_data.loc[(wildcards.id), ["GO_Rounds"]].dropna().values[0]
+        return per_sample_config[wildcards.id]["Assembler_options"]["getorganelle"]["GO_rounds"]
 
 def gather_assemblies(wildcards):
         return  glob.glob("output/gathered_assemblies/*.fasta")
@@ -107,17 +217,27 @@ to_process = {"id": [], "sub": [], "assembler": []}
 if os.environ["RUNMODE"] == "annotate":
     for f in glob.glob("output/gathered_assemblies/*.fasta"):
         (i,s,a) = os.path.basename(f).split(".")[:-1]
-        if (i in IDS) and (s in sub) and (a in Assembler):
+        if (i in IDS) and (s in per_sample_config[i]["sub"]) and (a in per_sample_config[i]["Assembler"]):
             to_process["id"].append(i)
             to_process["sub"].append(s)
             to_process["assembler"].append(a)
 else:
-        for i in IDS:
-            for s in sub:
-                for a in Assembler:    
-                    to_process["id"].append(i)
-                    to_process["sub"].append(s)
-                    to_process["assembler"].append(a)
+    for i in IDS:
+        for s in per_sample_config[i]["sub"]:
+            for a in per_sample_config[i]["Assembler"]:    
+                to_process["id"].append(i)
+                to_process["sub"].append(s)
+                to_process["assembler"].append(a)
+
+def pick_assembly(wildcards):
+    # this functions controls which assemblers are used for which sample - called in the Snakefile by the assembly_only rule
+    pull_list = []
+    for j in range(len(to_process["id"])):
+        i = to_process["id"][j]
+        s = to_process["sub"][j]
+        a = to_process["assembler"][j]
+        pull_list.append("output/"+i+"/assemblies/"+s+"/"+a+"/"+a+".ok")
+    return pull_list
 
 ##use this instead of expand to input all mitos.done files for annotation_stats rule
 
@@ -159,3 +279,11 @@ def pick_mode(wildcards):
     for f in pull_list:
         print(f)
     return pull_list
+
+def trigger_all(wildcards):
+    if os.environ["RUNMODE"] == "annotate":
+        if len(glob.glob("output/gathered_assemblies/*.fasta")) > 0:
+            return["output/report/report.html"]
+    else:
+        return["output/report/report.html"]
+
