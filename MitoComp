@@ -8,7 +8,7 @@ usage() {
         echo "Usage: $0 [-m <runmode>] [-t <submission_system>] [-c <config_file>] [-s \"<snakemke_args>\"]"
         echo
         echo "Options:"
-        echo "  -m <runmode> Determine how far the pipeline should run. Options: assembly, annotate, all. Default: all"
+        echo "  -m <runmode> Determine how far the pipeline should run. Options: assembly, gather, annotate, all. Default: all"
         echo "  -c <config_file> Path to config file in YAML format (default: data/config.yaml). "
         echo "  -t <submission_system> Specify available submission system. Options: sge, slurm, torque, local (no submission system)."
         echo "  --clusterconfig=<cluster_config_file> Path to cluster config file in YAML format (if submission system is non-local). "
@@ -109,6 +109,8 @@ if [[ $RUNMODE == "assembly" ]]; then
                   echo "Submission system not recognized"
                   exit 1
           fi
+elif [[ $RUNMODE == "gather" ]]; then
+        snakemake  --use-singularity --singularity-args "-B $(pwd)/.usr_tmp:/usertmp $SI_ARGS" --jobs 1 --configfile $CONFIG --force $SM_ARGS $DRY gather
 elif [[ $RUNMODE == "annotate" ]]; then
         ## if --dry is specified it will be executed as for mode local but with the dry flag
         if [ ! -z $DRY ]; then

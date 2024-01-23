@@ -210,6 +210,18 @@ def gather_assemblies(wildcards):
         return  glob.glob("output/gathered_assemblies/*.fasta")
 
 
+def trigger_gather(wildcards):
+    pull_list = []
+    for i in [ str(i) for i in per_sample_config.keys()]:
+        for s in [ str(s) for s in per_sample_config[i]["sub"]]:
+            for a in [ str(a) for a in per_sample_config[i]["Assembler"]]:
+                print("Looking for: output/"+i+"/assemblies/"+s+"/"+a+"/"+i+"."+s+"."+a+".fasta")
+                if os.path.exists(str("output/"+i+"/assemblies/"+s+"/"+a+"/"+i+"."+s+"."+a+".fasta")):
+                    pull_list.append("output/"+i+"/assemblies/"+s+"/"+a+"/"+i+"."+s+"."+a+".fasta")
+    print("PULL_LIST: "+str(pull_list))
+    return pull_list
+        
+
 # determine which conbinations to process
 # if assembly or all - do all combinations that are possilbe
 # if annotate - read in from gathered assembly and only do those

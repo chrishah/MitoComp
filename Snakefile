@@ -25,3 +25,16 @@ rule assembly_only:
     input:
         pick_assembly
 
+rule gather:
+    input:
+        trigger_gather
+    output:
+        "output/gathered_assemblies/gathered.done"
+    log:
+        "output/gathered_assemblies/gathered.log"
+    singularity: "docker://chrishah/mitobim:v.1.9.1" #this is only to make sure that rsync is stable
+    shell:
+        """
+        rsync -avpuzP -L {input} output/gathered_assemblies/ &> {log}
+        touch {output}
+        """
