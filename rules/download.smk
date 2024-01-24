@@ -5,34 +5,33 @@ rule fastqdump:
         output:
                 f = "output/{id}/reads/downloaded_reads/{id}_1.fastq.gz",
                 r = "output/{id}/reads/downloaded_reads/{id}_2.fastq.gz"
+        log: 
+                stdout = "output/{id}/reads/downloaded_reads/stdout.txt",
+                stderr = "output/{id}/reads/downloaded_reads/stderr.txt"
         singularity:
                 "docker://reslp/sra-tools:2.10.9"
         threads: config["threads"]["download"] 
-        shadow: "shallow"
+        shadow: "minimal"
         shell:
                 """
                 # configuration of sra-tools is messed up in singularity. This is connected with these issues:
                 # https://github.com/ncbi/sra-tools/issues/291
                 # https://standage.github.io/that-darn-cache-configuring-the-sra-toolkit.html
-                echo "no local files, downloading from SRA: {params.accession}"
+                echo "no local files, downloading from SRA: {params.accession}" 1> {log.stdout} 2> {log.stderr}
+                export HOME=$(pwd)
                 mkdir -p $HOME/.ncbi
                 printf '/LIBS/GUID = "%s"\\n' `uuidgen` > $HOME/.ncbi/user-settings.mkfg
                 mkdir -p $HOME/tmp
                 echo "/repository/user/main/public/root = \'$HOME/tmp\'" >> $HOME/.ncbi/user-settings.mkfg
 
-                #remove remnants of previous aborted downloads          
-                if [ $(find ./tmp/sra -name "{params.accession}*" | wc -l) -gt 0 ]; then rm tmp/sra/{params.accession}*; fi
-
                 # download
-                prefetch --max-size 1024000000 {params.accession}
-                fastq-dump --split-files --gzip --defline-seq '@$ac-$sn/$ri' --defline-qual '+' {params.accession}  
+                prefetch --max-size 1024000000 {params.accession} 1>> {log.stdout} 2>> {log.stderr}
+                fastq-dump --split-files --gzip --defline-seq '@$ac-$sn/$ri' --defline-qual '+' {params.accession} 1>> {log.stdout} 2>> {log.stderr}
 
                 #rename to expected output files
-                mv {params.accession}_1.fastq.gz {output.f}
-                mv {params.accession}_2.fastq.gz {output.r}
+                mv {params.accession}_1.fastq.gz {output.f} 1>> {log.stdout} 2>> {log.stderr}
+                mv {params.accession}_2.fastq.gz {output.r} 1>> {log.stdout} 2>> {log.stderr}
 
-                # cleanup
-                if [[ -f tmp/sra/{params.accession}.sra ]]; then rm tmp/sra/{params.accession}.sra; fi
                 """
 
 rule prep_local_reads:
