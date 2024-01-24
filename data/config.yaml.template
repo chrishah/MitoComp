@@ -15,8 +15,8 @@ seed:
 Assembler: ["norgal", "getorganelle", "mitoflex", "novoplasty", "mitobim"]
 Assembler_options:
     mitobim:
-        iterations: 50
-        non_default: "--clean"
+        iterations: 100
+        non_default: "--paired --clean"
     mitoflex:
         clade: "Chordata" # options are: Mollusca,Arthropoda,Annelida,Chordata,Porifera,Platyhelminthes,Nemertea,Bryozoa,Echinodermata,Nematoda 
         code: 2 # genetic code number
@@ -51,7 +51,7 @@ trimming:
     trimgalore_options:
         parameters: "--paired --length 70 -r1 71 -r2 71 --retain_unpaired --stringency 2 --quality 30"
     trimmomatic_options:
-        adapter: "adapterseq/TruSeq3-PE.fa"
+        adapter: "/opt/conda/pkgs/trimmomatic-0.38-0/share/trimmomatic-0.38-0/adapters/TruSeq3-PE.fa"
         minlength: 40 
         windowsize: 5
         stepsize: 4
