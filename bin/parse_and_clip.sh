@@ -30,7 +30,7 @@ else
 	fi
 	diff=$(( total - length ))
 
-	if [[ $diff -lt $(( readlength + readlength )) ]]
+	if [[ $diff -lt $(( readlength + readlength + readlength )) ]]
 	then
 		echo "Candidate fullfills our criteria"
 		circules.py -f $f -c $froto --prefix $outprefix
