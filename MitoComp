@@ -96,7 +96,6 @@ if [[ $RUNMODE == "assembly" ]]; then
                 exit 0
 	fi
 
-        if [[ ! -d output/gathered_assemblies/ ]]; then mkdir -p output/gathered_assemblies/; fi
         if [[ $CLUSTER == "slurm" ]]; then
                   snakemake --use-singularity --singularity-args "-B $(pwd)/.usr_tmp:/usertmp $SI_ARGS" --jobs $NJOBS --configfile $CONFIG --cluster-config $CLUSTER_CONFIG --cluster '$(pwd)/bin/immediate_submit/immediate_submit.py {dependencies} slurm' --immediate-submit $STDSMARGS $SM_ARGS assembly_only 2>&1 | tee log/submission.txt
           elif [[ $CLUSTER == "sge" ]]; then
@@ -132,7 +131,6 @@ elif [[ $RUNMODE == "annotate" ]]; then
                   exit 1
           fi
 elif [[ $RUNMODE == "all" ]]; then
-        if [[ ! -d output/gathered_assemblies/ ]]; then mkdir -p output/gathered_assemblies/; fi
         ## if --dry is specified it will be executed as for mode local but with the dry flag
         if [ ! -z $DRY ]; then
                 echo -e "dryrun"
