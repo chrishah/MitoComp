@@ -7,6 +7,7 @@ import numpy as np
 
 per_sample_config = {}
 if os.path.exists(str(config["samples"])):
+    print("Reading sample specific data from file '"+str(config["samples"]))
     sample_data = pd.read_table(config["samples"], sep=",", na_values=None).set_index("ID", drop=False)
     IDS = sample_data.index.values.tolist()
     ind_options = {'ID': "ID",
@@ -15,6 +16,7 @@ if os.path.exists(str(config["samples"])):
         'Assembler': 'Assembler',
         'seed': "seed",
         'SRA': "SRA", 
+        'Circules': "Assembler_options:mitobim:circules",
         'Clade': "Assembler_options:mitoflex:clade",
         'Code': "Assembler_options:mitoflex:code",
         'novoplasty_kmer': "Assembler_options:novoplasty:kmer",
@@ -93,6 +95,7 @@ if os.path.exists(str(config["samples"])):
                     print("need to update: "+str(in_data))
                     per_sample_config[ID][li[0]][li[1]][li[2]] = in_data
 else:
+    print("Reading from config file only")
     IDS = [str(config["ID"])]
     per_sample_config[str(config["ID"])] = config.copy()
     
@@ -179,17 +182,20 @@ def get_clade(wildcards):
 def get_code(wildcards):
         return per_sample_config[wildcards.id]["Assembler_options"]["mitoflex"]["code"]
 
+def get_circules_mode(wildcards):
+        return per_sample_config[wildcards.id]["Assembler_options"]["mitobim"]["circules"]
+
 def get_forward(wildcards):
-        if len(sample_data.loc[(wildcards.id), ["forward"]].dropna()) == 0:
-                return
+        if os.path.exists(str(per_sample_config[wildcards.id]["forward"])):
+                return per_sample_config[wildcards.id]["forward"]
         else:
-                return sample_data.loc[(wildcards.id), ["forward"]].dropna().values[0]
+                return
 
 def get_reverse(wildcards):
-        if len(sample_data.loc[(wildcards.id), ["reverse"]].dropna()) == 0:
-                return
+        if os.path.exists(str(per_sample_config[wildcards.id]["reverse"])):
+                return per_sample_config[wildcards.id]["reverse"]
         else:
-                return sample_data.loc[(wildcards.id), ["reverse"]].dropna().values[0]
+                return
 
 def get_kmer(wildcards):
         return per_sample_config[wildcards.id]["Assembler_options"]["novoplasty"]["kmer"]
@@ -215,9 +221,12 @@ def trigger_gather(wildcards):
     for i in [ str(i) for i in per_sample_config.keys()]:
         for s in [ str(s) for s in per_sample_config[i]["sub"]]:
             for a in [ str(a) for a in per_sample_config[i]["Assembler"]]:
-                print("Looking for: output/"+i+"/assemblies/"+s+"/"+a+"/"+i+"."+s+"."+a+".fasta")
+                print("Looking for: output/"+i+"/assemblies/"+s+"/"+a+"/"+i+"."+s+"."+a+".fasta .. ", end="")
                 if os.path.exists(str("output/"+i+"/assemblies/"+s+"/"+a+"/"+i+"."+s+"."+a+".fasta")):
+                    print("found")
                     pull_list.append("output/"+i+"/assemblies/"+s+"/"+a+"/"+i+"."+s+"."+a+".fasta")
+                else:
+                    print("nothing")
     print("PULL_LIST: "+str(pull_list))
     return pull_list
         
@@ -241,6 +250,8 @@ else:
                 to_process["sub"].append(s)
                 to_process["assembler"].append(a)
 
+print("to_process")
+print(to_process)
 def pick_assembly(wildcards):
     # this functions controls which assemblers are used for which sample - called in the Snakefile by the assembly_only rule
     pull_list = []

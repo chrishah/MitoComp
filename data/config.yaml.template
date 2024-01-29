@@ -10,12 +10,13 @@ SRA:
 
 ###### general section
 ###### the following settings will be applied to all samples unless specified otherwise in the sample file
-sub: ["5000000", "10000000", "20000000", "all"]
+sub: ["5000000", "10000000", "20000000", "30000000", "all"]
 seed: 
 Assembler: ["norgal", "getorganelle", "mitoflex", "novoplasty", "mitobim"]
 Assembler_options:
     mitobim:
         iterations: 100
+        circules: "best"
         non_default: "--paired --clean"
     mitoflex:
         clade: "Chordata" # options are: Mollusca,Arthropoda,Annelida,Chordata,Porifera,Platyhelminthes,Nemertea,Bryozoa,Echinodermata,Nematoda 

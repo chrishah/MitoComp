@@ -5,7 +5,7 @@ log=$2
 readlength=$3
 outprefix=$4
 ## could allow to choose different criteria
-#choice=$5
+mode=$5
 
 clip=$(cat $log | grep "clip points" | awk '{print $9"\t"$12"\t"$22}' | sed 's/;//' | sed "s/'//" | sort -n -k 2 -k 1)
 
@@ -28,19 +28,32 @@ else
 		froto=$(echo "$clip" | cut -f 3)
 		length=$(echo "$clip" | cut -f 1)
 	fi
-	diff=$(( total - length ))
 
-	if [[ $diff -lt $(( readlength + readlength + readlength )) ]]
+	if [[ $mode == "strict" ]]
 	then
-		echo "Candidate fullfills our criteria"
+		echo "check if candidate fullfills our criteria"
+
+		diff=$(( total - length ))
+	
+		if [[ $diff -lt $(( readlength + readlength + readlength )) ]]
+		then
+			echo "Candidate fullfills our criteria"
+			circules.py -f $f -c $froto --prefix $outprefix
+			sed -i "s/^>.*/>${outprefix}_circular_${length}/" $outprefix.circular.${length}.fasta
+			echo "result in file: $(pwd)/$outprefix.fasta"
+			ln -s $outprefix.circular.${length}.fasta $outprefix.fasta
+		else
+			echo "Candidate doesn't fullfill our criteria - we recommend manual curation"
+			sed "s/^>.*/>${outprefix}_circular_${length}/" $f > $outprefix.fasta.needs_attention
+			echo "see file: $(pwd)/$outprefix.fasta.needs_attention"
+		fi
+	elif [[ $mode == "best" ]]
+	then
+		echo "Extracting candidate of length $length bp"
 		circules.py -f $f -c $froto --prefix $outprefix
 		sed -i "s/^>.*/>${outprefix}_circular_${length}/" $outprefix.circular.${length}.fasta
 		echo "result in file: $(pwd)/$outprefix.fasta"
 		ln -s $outprefix.circular.${length}.fasta $outprefix.fasta
-	else
-		echo "Candidate doesn't fullfill our criteria - we recommend manual curation"
-		sed "s/^>.*/>${outprefix}_circular_${length}/" $f > $outprefix.fasta.needs_attention
-		echo "see file: $(pwd)/$outprefix.fasta.needs_attention"
 	fi
 fi
 

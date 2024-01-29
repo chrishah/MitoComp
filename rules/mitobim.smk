@@ -74,7 +74,8 @@ rule MITObim_circules:
         id = "{id}",
         wd = os.getcwd(),
         outdir = "output/{id}/assemblies/{sub}/mitobim",
-        readlength = get_readlength
+        readlength = get_readlength,
+        mode = get_circules_mode
     log: 
         stdout = "output/{id}/assemblies/{sub}/mitobim/mitobim_circules.stdout.txt",
         stderr = "output/{id}/assemblies/{sub}/mitobim/mitobim_circules.stderr.txt"
@@ -96,7 +97,7 @@ rule MITObim_circules:
             circules.py -f {wildcards.id}.{wildcards.sub}.mitobim-preclip.fasta 1>> {params.wd}/{log.stdout} 2>> {params.wd}/{log.stderr}
 
             echo -e "\\n#### [$(date)]\\tparsing output and clip assembly if criteria for circularity are fullfilled" 1>> {params.wd}/{log.stdout}
-            {params.wd}/bin/parse_and_clip.sh {wildcards.id}.{wildcards.sub}.mitobim-preclip.fasta {params.wd}/{log.stdout} {params.readlength} {wildcards.id}.{wildcards.sub}.mitobim 1>> {params.wd}/{log.stdout} 2>> {params.wd}/{log.stderr}
+            {params.wd}/bin/parse_and_clip.sh {wildcards.id}.{wildcards.sub}.mitobim-preclip.fasta {params.wd}/{log.stdout} {params.readlength} {wildcards.id}.{wildcards.sub}.mitobim {params.mode} 1>> {params.wd}/{log.stdout} 2>> {params.wd}/{log.stderr}
 
             if [[ -f {wildcards.id}.{wildcards.sub}.mitobim.fasta ]]
             then            
