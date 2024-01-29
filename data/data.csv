@@ -1,6 +1,6 @@
 ID,forward,reverse,SRA,seed,Clade,Code,novoplasty_kmer,Read_length,Adapter,Type,GO_Rounds
+C_elegans,,,SRR13374450,seeds/C.elegans_coxI.fasta,Nematoda,5,39,71,,animal_mt,10
 D_ananassae,,,SRR12836360,seeds/D.ananassae_coxI.fasta,Arthropoda,5,39,151,,animal_mt,10
 M_musculus,,,SRR13326502,seeds/M.musculus_coxI.fasta,Chordata,2,39,151,,animal_mt,10
-C_elegans,,,SRR13374450,seeds/C.elegans_coxI.fasta,Nematoda,5,39,151,,animal_mt,10
 D_rerio,,,SRR13166697,seeds/D.rerio_coxI.fasta,Chordata,2,39,151,,animal_mt,10
-O_vulgaris,,,SRR8079591,seeds/O.vulgaris_coxI.fasta,Mollusca,5,39,151,,animal_mt,10
+O_vulgaris,,,SRR8079591,seeds/O.vulgaris_coxI.fasta,Mollusca,5,39,296,,animal_mt,10
