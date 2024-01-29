@@ -42,6 +42,8 @@ rule mitoflex:
         cd {params.outdir}
         export HOME="{params.wd}/bin/MitoFlex"
 
+            echo -e "\\n#### [$(date)]\\tFind full mitoflex log here: {params.outdir}/MitoFlex/MitoFlex.log" 1> {params.wd}/{log.stdout}
+
         # run mitoflex - capture returncode, so if it fails, the pipeline won't stop 
         {params.wd}/bin/MitoFlex/MitoFlex.py all --workname MitoFlex --threads {threads} --fastq1 {params.wd}/{input.f} --fastq2 {params.wd}/{input.r} --genetic-code {params.genetic_code} --clade {params.clade} {params.non_default} 1> {params.wd}/{log.stdout} 2> {params.wd}/{log.stderr} && returncode=$? || returncode=$?
         if [ $returncode -gt 0 ]
