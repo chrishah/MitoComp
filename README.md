@@ -31,7 +31,7 @@ conda activate snakemake
 The user should first clone this repository to their local computer. To do this use the following command.
 
 ```
-git clone --recursive https://github.com/SamLMG/MitoComp.git
+git clone --recursive https://github.com/chrishah/MitoComp.git
 ```
 
 ## Downloading adapter sequences
@@ -53,7 +53,7 @@ MitoComp requires two files to run, both of which should be edited by the user p
 The config file (an example is shipped with this repository at data/config.yaml) allows the user to customise the set up of their MitoComp run. First, different combinations of assemblers to be used by adding or removing them from a list. The default config file we provide is set to use all five assemblers:
 
 ```
-Assembler: ["norgal", "getorganelle", "mitoflex", "novoplasty", "mitobim"]
+Assembler: ["norgal", "getorganelle", "mitoflex", "novoplasty", "mitobim", "mitoz"]
 ```
 The user may however, only want to use norgal, in which case they would set this to:
 
@@ -74,19 +74,22 @@ Furthermore, the level of subsampling can be set in a similar manner by editing 
 For example, the following sub list will subsample the datasets thrice: with 5, 10 and 20 million randomly selected reads.
 
 ```
-sub: ["5000000", "10000000", "20000000"]
+subsample:
+    sub: ["5000000", "10000000", "20000000"]
 ```
 
 Users may choose to use all their data instead of subsampling, in which case they may provide the option "all" to this list
 
 ```
-sub: ["all"]
+subsample:
+    sub: ["all"]
 ```
 
 Or they may wish to run their datasets with all data and a subsample of 5 million reads.
 
 ```
-sub: ["all", "5000000"]
+subsample:
+    sub: ["all", "5000000"]
 ```
 
 The number of threads given to each rule can be set by the user in the config file. For instance,
