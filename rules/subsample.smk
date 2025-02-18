@@ -7,7 +7,7 @@ rule subsample:
         r = "output/{id}/reads/sub/{sub}/{id}_2.fastq.gz",
         ok = "output/{id}/reads/sub/{sub}/{id}_{sub}.ok"
     params: 
-        seed= config["subsample"]["seed"],
+        seed= config["subsample"]["random_seed"],
         wd = os.getcwd()
     threads: config["threads"]["subsample"] 
     singularity:
