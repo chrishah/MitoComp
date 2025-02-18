@@ -1,4 +1,5 @@
-samples: "data/data.csv"
+#if you have multiple samples to process specify sample file
+samples: "data/data.Eubothrium.csv"
 
 ################################## not functional right now
 #fill out if you only have one sample to process - the following four lines will be ignored and the information in the samples file takes precedence
@@ -9,19 +10,24 @@ SRA:
 #################################
 
 ###### general section
+report_prefix: "Eubothrium"
+
 ###### the following settings will be applied to all samples unless specified otherwise in the sample file
-sub: ["5000000", "10000000", "20000000", "30000000", "all"]
 seed: 
-Assembler: ["norgal", "getorganelle", "mitoflex", "novoplasty", "mitobim"]
+Assembler: ["mitobim", "novoplasty", "getorganelle", "norgal", "mitoflex"] 
 Assembler_options:
     mitobim:
         iterations: 100
         circules: "best"
-        non_default: "--paired --clean"
+        non_default: "--paired --clean" 
     mitoflex:
-        clade: "Chordata" # options are: Mollusca,Arthropoda,Annelida,Chordata,Porifera,Platyhelminthes,Nemertea,Bryozoa,Echinodermata,Nematoda 
-        code: 2 # genetic code number
+        clade: "Platyhelminthes" # options are: Mollusca,Arthropoda,Annelida,Chordata,Porifera,Platyhelminthes,Nemertea,Bryozoa,Echinodermata,Nematoda 
+        code: 9 # genetic code number
         non_default: "--level debug"
+    mitoz:
+        clade: "Platyhelminthes" # options are: Mollusca,Arthropoda,Annelida,Chordata,Porifera,Platyhelminthes,Nemertea,Bryozoa,Echinodermata,Nematoda 
+        code: 9 # genetic code number
+        non_default: ""
     novoplasty:
         kmer: 39
         readlength: 151
@@ -32,6 +38,7 @@ Assembler_options:
         non_default: ""
     norgal:
         non_default: "--blast"
+
 threads:
     download: 2
     trimmomatic: 4
@@ -41,18 +48,19 @@ threads:
     norgal: 4
     getorganelle: 4
     mitoflex: 4
+    mitoz: 4
     novoplasty: 4
     mitobim: 4
     annotation: 2
     alignment: 4        
 
 trimming:
-    skip: #"yes"
-    software: "trimgalore" # either "trimmomatic" or "trimgalore"
+    skip: "yes"
+    software: "trimgalore" #, "trimgalore"]
     trimgalore_options:
         parameters: "--paired --length 70 -r1 71 -r2 71 --retain_unpaired --stringency 2 --quality 30"
     trimmomatic_options:
-        adapter: "/opt/conda/pkgs/trimmomatic-0.38-0/share/trimmomatic-0.38-0/adapters/TruSeq3-PE.fa"
+        adapter: "adapterseq/TruSeq3-PE.fa"
         minlength: 40 
         windowsize: 5
         stepsize: 4
@@ -63,4 +71,5 @@ trimming:
         simple_clip: 10
 
 subsample:
-    seed: 553353
+    sub: ["10000000"]
+    random_seed: 553353

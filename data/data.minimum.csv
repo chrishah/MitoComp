@@ -1,0 +1,3 @@
+ID,forward,reverse,seed
+Ecr_One_Ss-w,../../RAW_DATA/Eubothrium/Ecra_One_Ssw/trimming/trimgalore/Ecra_One_Ssw/Ecra_One_Ssw.Ecra_One_Ssw.1.fastq.gz,../../RAW_DATA/Eubothrium/Ecra_One_Ssw/trimming/trimgalore/Ecra_One_Ssw/Ecra_One_Ssw.Ecra_One_Ssw.2.fastq.gz,seeds/Eubothrium.crassum.COI.fasta
+Esa_Kje_Sa-w,../../RAW_DATA/Eubothrium/EsKje_Sa_w/trimming/trimgalore/Macrogen-2020/EsKje_Sa_w.Macrogen-2020.1.fastq.gz,../../RAW_DATA/Eubothrium/EsKje_Sa_w/trimming/trimgalore/Macrogen-2020/EsKje_Sa_w.Macrogen-2020.2.fastq.gz,seeds/Eubothrium.salvelini.COI.fasta
