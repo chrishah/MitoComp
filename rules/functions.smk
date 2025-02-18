@@ -45,7 +45,7 @@ if os.path.exists(str(config["samples"])):
         print(per_sample_config[ID])
         print("checking for individual options")
         for c in present:
-            print(c)
+            print("\n"+c)
             li = ind_options[c].split(":")
             print(li,len(li))
             if len(li) == 1:
@@ -105,11 +105,15 @@ for ID in per_sample_config.keys():
         print(ID+":")
         print(per_sample_config[ID])
 
+def get_ids():
+	return " ".join(list(per_sample_config.keys()))
+
 #Assembler = config["Assembler"] 
 #sub = config["sub"]
 
 def get_accession(wildcards):
-        return per_sample_config[wildcards.id]["SRA"]
+        if per_sample_config[wildcards.id]["SRA"]:
+        	return per_sample_config[wildcards.id]["SRA"]
 
 def trimin_forward(wildcards):
         if per_sample_config[wildcards.id]["SRA"]:
@@ -219,7 +223,7 @@ def gather_assemblies(wildcards):
 def trigger_gather(wildcards):
     pull_list = []
     for i in [ str(i) for i in per_sample_config.keys()]:
-        for s in [ str(s) for s in per_sample_config[i]["sub"]]:
+        for s in [ str(s) for s in per_sample_config[i]["subsample"]["sub"]]:
             for a in [ str(a) for a in per_sample_config[i]["Assembler"]]:
                 print("Looking for: output/"+i+"/assemblies/"+s+"/"+a+"/"+i+"."+s+"."+a+".fasta .. ", end="")
                 if os.path.exists(str("output/"+i+"/assemblies/"+s+"/"+a+"/"+i+"."+s+"."+a+".fasta")):
@@ -238,13 +242,13 @@ to_process = {"id": [], "sub": [], "assembler": []}
 if os.environ["RUNMODE"] == "annotate":
     for f in glob.glob("output/gathered_assemblies/*.fasta"):
         (i,s,a) = os.path.basename(f).split(".")[:-1]
-        if (i in IDS) and (s in per_sample_config[i]["sub"]) and (a in per_sample_config[i]["Assembler"]):
+        if (i in IDS) and (s in per_sample_config[i]["subsample"]["sub"]) and (a in per_sample_config[i]["Assembler"]):
             to_process["id"].append(i)
             to_process["sub"].append(s)
             to_process["assembler"].append(a)
 else:
     for i in IDS:
-        for s in per_sample_config[i]["sub"]:
+        for s in per_sample_config[i]["subsample"]["sub"]:
             for a in per_sample_config[i]["Assembler"]:    
                 to_process["id"].append(i)
                 to_process["sub"].append(s)
