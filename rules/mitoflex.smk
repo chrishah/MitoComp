@@ -45,7 +45,9 @@ rule mitoflex:
             echo -e "\\n#### [$(date)]\\tFind full mitoflex log here: {params.outdir}/MitoFlex/MitoFlex.log" 1> {params.wd}/{log.stdout}
 
         # run mitoflex - capture returncode, so if it fails, the pipeline won't stop 
-        {params.wd}/bin/MitoFlex/MitoFlex.py all --workname MitoFlex --threads {threads} --fastq1 {params.wd}/{input.f} --fastq2 {params.wd}/{input.r} --genetic-code {params.genetic_code} --clade {params.clade} {params.non_default} 1> {params.wd}/{log.stdout} 2> {params.wd}/{log.stderr} && returncode=$? || returncode=$?
+        {params.wd}/bin/MitoFlex/MitoFlex.py assemble --workname MitoFlex --threads {threads} --fastq1 {params.wd}/{input.f} --fastq2 {params.wd}/{input.r} {params.non_default} 1> {params.wd}/{log.stdout} 2> {params.wd}/{log.stderr} && returncode=$? || returncode=$?
+
+	#findmitoscaf --workname MitoFlex --threads {threads} --fastq1 {params.wd}/{input.f} --fastq2 {params.wd}/{input.r}--genetic-code {params.genetic_code} --clade {params.clade} {params.non_default}
         if [ $returncode -gt 0 ]
         then
             echo -e "\\n#### [$(date)]\\tmitoflex exited with an error - moving on - for details see: {params.wd}/{log.stderr}" 1>> {params.wd}/{log.stdout}
