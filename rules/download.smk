@@ -25,7 +25,7 @@ rule fastqdump:
                 echo "/repository/user/main/public/root = \'$HOME/tmp\'" >> $HOME/.ncbi/user-settings.mkfg
 
                 # download
-                prefetch --max-size 1024000000 {params.accession} 1>> {log.stdout} 2>> {log.stderr}
+                #prefetch --max-size 1024000000 {params.accession} 1>> {log.stdout} 2>> {log.stderr}
                 fastq-dump --split-files --gzip --defline-seq '@$ac-$sn/$ri' --defline-qual '+' {params.accession} 1>> {log.stdout} 2>> {log.stderr}
 
                 #rename to expected output files
