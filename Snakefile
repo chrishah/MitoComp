@@ -8,6 +8,7 @@ include: "rules/subsample.smk"
 include: "rules/norgal.smk"
 include: "rules/getorganelle.smk"
 include: "rules/mitoflex.smk"
+include: "rules/mitoz.smk"
 include: "rules/novoplasty.smk"
 include: "rules/mitobim.smk"
 include: "rules/annotation.smk"
@@ -19,7 +20,7 @@ include: "rules/report.smk"
 
 rule all:
     input:
-        "output/report/report.html"
+        "output/reports/"+config["report_prefix"]+"_report/report.html"
 
 rule assembly_only:
     input:
