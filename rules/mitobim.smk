@@ -87,7 +87,7 @@ rule MITObim_circules:
         """
         cd {params.outdir}
         #make sure all remnants from previous attempts are gone
-        rm {wildcards.id}.{wildcards.sub}.mitobim.*
+        if [[ -f {wildcards.id}.{wildcards.sub}.mitobim.* ]]; then rm {wildcards.id}.{wildcards.sub}.mitobim.*; fi
 
         echo -e "\\n#### [$(date)]\\tChecking for mitobim assembly" 1> {params.wd}/{log.stdout}
         if [[ -f {wildcards.id}.{wildcards.sub}.mitobim-preclip.fasta ]]
