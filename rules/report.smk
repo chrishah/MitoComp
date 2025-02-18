@@ -1,12 +1,21 @@
 rule annotation_statsII:
     input:
         pick_mode
+    params:
+        ids = get_ids()
     output:
         done = "output/stats/annotation_statsII.done",
     shell:
         """
-        find ./output/*/annotation/alignment/clustalo/ -name "*.fasta" | cat > output/stats/assembly_pathsII.txt
-        find ./output/*/annotation/second_mitos/ -name "result.bed" | cat > output/stats/bed_pathsII.txt
+	if [[ -f output/stats/assembly_pathsII.txt ]]; then rm output/stats/assembly_pathsII.txt; fi
+	if [[ -f output/stats/bed_pathsII.txt ]]; then rm output/stats/bed_pathsII.txt; fi
+	if [[ -f output/stats/map_pathsII.txt ]]; then rm output/stats/map_pathsII.txt; fi
+        for id in $(echo "{params.ids}")
+        do
+            find ./output/$id/annotation/alignment/ -name "$id*.final.fasta" >> output/stats/assembly_pathsII.txt
+            find ./output/$id/annotation/second_mitos/ -name "result.bed" >> output/stats/bed_pathsII.txt
+            find ./output/$id/annotation/compare/CCT/*.png >> output/stats/map_pathsII.txt
+        done
         scripts/annotate.py output/stats/bed_pathsII.txt output/stats/assembly_pathsII.txt output/stats/GenesII.txt
         touch {output.done}
         """
@@ -15,8 +24,9 @@ rule report:
     input:
         rules.annotation_statsII.output
     output:
-        "output/report/report.html"
+        "output/reports/"+config["report_prefix"]+"_report/report.html"
     params:
+        prefix = config["report_prefix"],
         wd = os.getcwd()
     singularity:
         "docker://reslp/rmarkdown:4.0.3"
@@ -24,44 +34,42 @@ rule report:
         """     
         # gather bedfiles
         # bedfiles all have the same name, therfore this hack to find, rename and copy the files to a location in the report directory.
-        mkdir -p output/report/bedfiles
-        for bedfile in $(find ./output/*/annotation/second_mitos/*/ -name "result.bed"); do
-            name=$(echo $bedfile | awk -F/ '{{print $6}}')
-            cp $bedfile output/report/bedfiles/$name.bed
+        mkdir -p output/reports/{params.prefix}_report/bedfiles
+        for f in $(cat output/stats/bed_pathsII.txt)
+        do
+            name=$(echo $f | awk -F/ '{{print $6}}')
+            cp $f output/reports/{params.prefix}_report/bedfiles/$name.bed
         done
         
-        # gather assemblies
-        assemblies=$(find ./output/*/annotation/alignment/*.final.fasta)
-        mkdir -p output/report/assemblies
-        cp $assemblies output/report/assemblies 2>/dev/null || :
-        while read first rest
-            file=$first
-            position=$rest
-            prefix1=$(echo $first | cut -d "/" -f3 | cut -d "." -f 1)
-            prefix2=$(echo $first | cut -d "/" -f3 | cut -d "." -f 1-3)
-        do
-        echo $prefix2
-        if [ ! -z "$prefix2" ]
-        then
-            sed -i "s#>.*#>$prefix2#g" output/report/assemblies/$prefix2.final.fasta
-        else
-            echo $prefix2
-            break 
-        fi
-        done < output/stats/start_positions.txt
+        # gather assemblies assemblies and rename sequences for report
+        mkdir -p output/reports/{params.prefix}_report/assemblies
+        cp $(cat output/stats/assembly_pathsII.txt) output/reports/{params.prefix}_report/assemblies/
+        for f in $(ls -1 output/reports/{params.prefix}_report/assemblies/*)
+	do
+            header=$(basename $f | cut -d "." -f 1-3)
+            echo $header
+            if [ ! -z "$header" ]
+            then
+                sed -i "s#>.*#>$header#g" output/reports/{params.prefix}_report/assemblies/$header.final.fasta
+            else
+                echo $header
+                break 
+            fi
+        done
         
         # gather maps   
-        maps=$(find ./output/*/annotation/compare/CCT/*.png)
-        mkdir -p output/report/maps
-        cp $maps output/report/maps 2>/dev/null || :
+        mkdir -p output/reports/{params.prefix}_report/maps
+        cp $(cat output/stats/map_pathsII.txt) output/reports/{params.prefix}_report/maps
                 
         # copy genes file
-        cp output/stats/GenesII.txt output/report/GenesII.txt
+        cp output/stats/GenesII.txt output/reports/{params.prefix}_report/GenesII.txt
                         
         # create report
-        Rscript -e 'rmarkdown::render("./scripts/report.Rmd")'
-        
+        sed 's/PREFIX/{params.prefix}/' ./scripts/report.Rmd > output/reports/{params.prefix}_report/report.Rmd 
+	cd output/reports/{params.prefix}_report/
+        Rscript -e 'rmarkdown::render("./report.Rmd")'
+        cd -
+
         # clean up
-        mv scripts/report.html output/report/report.html
-        tar -pcf {params.wd}/output/report.tar -C {params.wd}/output/ report
+        tar -pcf {params.wd}/output/reports/{params.prefix}_report.tar -C {params.wd}/output/reports {params.prefix}_report
         """     

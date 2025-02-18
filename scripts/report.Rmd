@@ -29,8 +29,15 @@ $(document).ready(function(){
 ## Overview
 
 ```{r, echo=F}
+#args <- commandArgs(trailingOnly=TRUE)
+#prefix <- args[1] # get working directory
+#config_file_path <- paste0("../",args[2])
+
+#wd <- getwd()
+#prefix <- paste0(wd, "/../output/reports/", prefix, "_report/")
+
 wd <- getwd()
-prefix <- paste0(wd, "/../output/report/")
+prefix <- paste0(wd, "/")
 
 options(scipen=999)
 
